@@ -1,5 +1,8 @@
 # Shearlexity: shearlet-based spatial entropy  and complexity maps for textures
 
+[![DOI](https://zenodo.org/badge/119748594.svg)](https://zenodo.org/badge/latestdoi/119748594)
+
+
 ## Installation
 
 1. Install Anaconda Python distribution
