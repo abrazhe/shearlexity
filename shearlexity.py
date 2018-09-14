@@ -11,12 +11,15 @@ from FFST._fft import ifftnc  # centered nD inverse FFT
 
 logfn = np.log2
 
-def map_cecp(img, startscale=4, rho=3,pad_to=0, Psi=None, with_plots=True):
+def map_cecp(img, startscale=4, rho=3,pad_to=0, Psi=None, with_plots=True, pmask=None, add_noise_amp=0.0,):
     """
     Calculate and show Comlexity-Entropy spatial maps for an input image
     """
 
     img,npad = pad_img(img, pad_to)
+
+    img = img + add_noise_amp*np.random.randn(*img.shape)
+    
     nr,nc = img.shape
     crop = (slice(npad,-npad),)*2
     H,C = local_cecp(img,startscale,rho=rho,Psi=Psi)
@@ -39,7 +42,7 @@ def map_cecp(img, startscale=4, rho=3,pad_to=0, Psi=None, with_plots=True):
     return H,C
 
 
-def local_cecp(img,startscale=2,rho=3,Psi=None):
+def local_cecp(img,startscale=2,rho=3,Psi=None,pmask=None):
     "cecp-shearlets: complexity-entropy causality pair for an image (local)"
 
     img = parity_crop(img)
@@ -82,6 +85,15 @@ def local_cecp(img,startscale=2,rho=3,Psi=None):
     J = -np.sum((PPr)*logfn(1e-8+PPr),-1) - 0.5*(S + logfn(M))
     Hr = S/logfn(M)
     Cr = J*Hr/jmax(M)
+
+    
+    if pmask is "nonsmooth":
+        pmask = sdmap>0.01*details_range
+        pmask = ndimage.binary_fill_holes(pmask)
+    if pmask is not None and not isinstance(pmask,str):
+        Hr *= pmask
+        Cr *= pmask
+
     
     return Hr, Cr
 
