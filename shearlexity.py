@@ -120,7 +120,8 @@ def global_cecp(ST,startscale=2, central_slice=None,):
 
 def jmax(M):
     "Max Jensen-Shannon divergence in a system of M states"
-    return -0.5*((M+1)*logfn(M+1)/M -2*logfn(2*M) + logfn(M))
+    #return -0.5*((M+1)*logfn(M+1)/M -2*logfn(2*M) + logfn(M))
+    return -0.5*((M+1)*logfn(M+1)/M -logfn(4*M))
 
 
 def parity_crop(f):
