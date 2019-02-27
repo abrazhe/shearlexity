@@ -4,14 +4,24 @@ import numpy as np
 from scipy import ndimage
 from matplotlib import pyplot as plt
 
+import FFST
+
 from FFST import (scalesShearsAndSpectra,
                   inverseShearletTransformSpect,
                   shearletTransformSpect)
+
 from FFST._fft import ifftnc  # centered nD inverse FFT
 
 logfn = np.log2
 
-def map_cecp(img, startscale=4, rho=3,pad_to=0, Psi=None, with_plots=True, pmask=None, add_noise_amp=0.0,):
+def map_cecp(img, startscale=4, rho=3, pad_to=0, Psi=None,
+             with_plots=True,
+             pmask=None,
+             add_noise_amp=0.0,
+             img_kw = None,
+             entropy_kw = None,
+             complexity_kw = None):
+             
     """
     Calculate and show Comlexity-Entropy spatial maps for an input image
     """
@@ -25,14 +35,24 @@ def map_cecp(img, startscale=4, rho=3,pad_to=0, Psi=None, with_plots=True, pmask
     H,C = local_cecp(img,startscale,rho=rho,Psi=Psi)
     if npad > 0:
         img,H,C = (a[crop] for a in (img, H,C))
-    
+        
     if with_plots:
+
+        if img_kw is None: img_kw = {}
+        if complexity_kw is None: complexity_kw = {}
+        if entropy_kw is None: entropy_kw = {}
+        kws = (img_kw, entropy_kw, complexity_kw)
+        default_cmaps = ('gray', 'winter','summer')
+        for kw, cm in zip(kws,default_cmaps):
+            if not 'cmap' in kw:
+                kw['cmap'] = cm
+                        
         to_show = (img, H,C )
         f, axs = plt.subplots(1,3,figsize=(12,4))
         titles = ('input','H','C','mask')
-        cmaps = ('gray', 'winter','summer')
-        for ax, img, title,cm in zip(axs, to_show, titles,cmaps):
-            imh = ax.imshow(img,cmap=cm)
+
+        for ax, img, title,kw in zip(axs, to_show, titles,kws):
+            imh = ax.imshow(img,**kw)
             ax.set_title(title)
             plt.colorbar(mappable=imh, ax=ax)
 
